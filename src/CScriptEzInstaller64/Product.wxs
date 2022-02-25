@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"><?define CScriptEz_TargetDir=$(var.CScriptEz.TargetDir)?>
+	<Product Id="*" Name="CScriptEzInstaller64" Language="1033" Version="1.0.0.0" Manufacturer="??? Inc." UpgradeCode="a0b0467a-a0d1-4286-a91a-2510a9ce2b51">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <Media Id="1" Cabinet="CScriptEz.cab" EmbedCab="yes" />
+
+        <Feature Id="ProductFeature" Title="CScriptEzInstaller64" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+        <UIRef Id="WixUI_InstallDir" />
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="INSTALLFOLDER" Name="CScriptEz" />
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+			<!-- <Component Id="ProductComponent"> -->
+				<!-- TODO: Insert files, registry keys, and other resources here. -->
+			<!-- </Component> -->
+			<Component Id="CScriptEz.runtimeconfig.json" Guid="be659bdb-85c3-44e2-96e0-40f35b770316">
+			  <File Id="CScriptEz.runtimeconfig.json" Name="CScriptEz.runtimeconfig.json" Source="$(var.CScriptEz_TargetDir)CScriptEz.runtimeconfig.json" />
+			</Component>
+			<Component Id="Microsoft.Data.Sqlite.dll" Guid="e447bd7f-8dee-4e08-b69a-c90c163c5dfd">
+			  <File Id="Microsoft.Data.Sqlite.dll" Name="Microsoft.Data.Sqlite.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Data.Sqlite.dll" />
+			</Component>
+			<Component Id="Microsoft.DotNet.PlatformAbstractions.dll" Guid="10a30350-097f-4e5d-90e2-bfeadce9e271">
+			  <File Id="Microsoft.DotNet.PlatformAbstractions.dll" Name="Microsoft.DotNet.PlatformAbstractions.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.DotNet.PlatformAbstractions.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Configuration.Abstractions.dll" Guid="6c882b1e-83e1-413c-a20c-8c036afde192">
+			  <File Id="Microsoft.Extensions.Configuration.Abstractions.dll" Name="Microsoft.Extensions.Configuration.Abstractions.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Configuration.Abstractions.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Caching.Memory.dll" Guid="1434c214-4ca7-4ca5-a9cd-05be1c81fe7f">
+			  <File Id="Microsoft.Extensions.Caching.Memory.dll" Name="Microsoft.Extensions.Caching.Memory.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Caching.Memory.dll" />
+			</Component>
+			<Component Id="Microsoft.EntityFrameworkCore.Abstractions.dll" Guid="ab02502b-2e5d-4a52-9ce2-3a709d7c9758">
+			  <File Id="Microsoft.EntityFrameworkCore.Abstractions.dll" Name="Microsoft.EntityFrameworkCore.Abstractions.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.EntityFrameworkCore.Abstractions.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Primitives.dll" Guid="ec52ab10-2a25-4473-bc24-9c043f521b2d">
+			  <File Id="Microsoft.Extensions.Primitives.dll" Name="Microsoft.Extensions.Primitives.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Primitives.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Caching.Abstractions.dll" Guid="6aa7cfcb-7d4b-41d2-995a-bf7064db1147">
+			  <File Id="Microsoft.Extensions.Caching.Abstractions.dll" Name="Microsoft.Extensions.Caching.Abstractions.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Caching.Abstractions.dll" />
+			</Component>
+			<Component Id="System.Diagnostics.DiagnosticSource.dll" Guid="3260e64e-7729-4478-90d2-e884b8c9a6dd">
+			  <File Id="System.Diagnostics.DiagnosticSource.dll" Name="System.Diagnostics.DiagnosticSource.dll" Source="$(var.CScriptEz_TargetDir)System.Diagnostics.DiagnosticSource.dll" />
+			</Component>
+			<Component Id="Serilog.Extensions.Logging.dll" Guid="c6894afd-9342-4a30-be0c-6ee43f395825">
+			  <File Id="Serilog.Extensions.Logging.dll" Name="Serilog.Extensions.Logging.dll" Source="$(var.CScriptEz_TargetDir)Serilog.Extensions.Logging.dll" />
+			</Component>
+			<Component Id="Microsoft.EntityFrameworkCore.Sqlite.dll" Guid="ccec17fa-9f78-4c12-9c14-e2d8f843b700">
+			  <File Id="Microsoft.EntityFrameworkCore.Sqlite.dll" Name="Microsoft.EntityFrameworkCore.Sqlite.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.EntityFrameworkCore.Sqlite.dll" />
+			</Component>
+			<Component Id="SQLitePCLRaw.core.dll" Guid="a363556f-109d-4cb7-b9a9-5a469344a994">
+			  <File Id="SQLitePCLRaw.core.dll" Name="SQLitePCLRaw.core.dll" Source="$(var.CScriptEz_TargetDir)SQLitePCLRaw.core.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Options.dll" Guid="e55e240e-b204-46fe-93fa-5c530a6d99ba">
+			  <File Id="Microsoft.Extensions.Options.dll" Name="Microsoft.Extensions.Options.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Options.dll" />
+			</Component>
+			<Component Id="Serilog.dll" Guid="9d5701e0-266e-41ff-ab70-597310d414fc">
+			  <File Id="Serilog.dll" Name="Serilog.dll" Source="$(var.CScriptEz_TargetDir)Serilog.dll" />
+			</Component>
+			<Component Id="Microsoft.EntityFrameworkCore.Relational.dll" Guid="99732e4e-fa0a-486c-b181-db61f5332bf5">
+			  <File Id="Microsoft.EntityFrameworkCore.Relational.dll" Name="Microsoft.EntityFrameworkCore.Relational.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.EntityFrameworkCore.Relational.dll" />
+			</Component>
+			<Component Id="Microsoft.EntityFrameworkCore.dll" Guid="13c7e314-01cc-476a-9b3d-4c5501910d3b">
+			  <File Id="Microsoft.EntityFrameworkCore.dll" Name="Microsoft.EntityFrameworkCore.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.EntityFrameworkCore.dll" />
+			</Component>
+			<Component Id="Microsoft.CodeAnalysis.dll" Guid="a2cd932c-fff0-41e2-acfa-bdce4fdbd046">
+			  <File Id="Microsoft.CodeAnalysis.dll" Name="Microsoft.CodeAnalysis.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.CodeAnalysis.dll" />
+			</Component>
+			<Component Id="Microsoft.CodeAnalysis.CSharp.dll" Guid="c3620c01-9e83-4f6f-ad0c-94a6916b76b5">
+			  <File Id="Microsoft.CodeAnalysis.CSharp.dll" Name="Microsoft.CodeAnalysis.CSharp.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.CodeAnalysis.CSharp.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Logging.dll" Guid="6cc540fb-03c2-4972-8ba3-7a7491a0d122">
+			  <File Id="Microsoft.Extensions.Logging.dll" Name="Microsoft.Extensions.Logging.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Logging.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Guid="4ee9b1fb-54da-48b9-88b5-63a2f117d4f7">
+			  <File Id="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Name="Microsoft.Extensions.DependencyInjection.Abstractions.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.DependencyInjection.dll" Guid="0a4e9228-dda2-4b03-b7cd-265eaf827a59">
+			  <File Id="Microsoft.Extensions.DependencyInjection.dll" Name="Microsoft.Extensions.DependencyInjection.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.DependencyInjection.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.Logging.Abstractions.dll" Guid="76cca7f2-a050-4743-99ec-eda4eaff2ee0">
+			  <File Id="Microsoft.Extensions.Logging.Abstractions.dll" Name="Microsoft.Extensions.Logging.Abstractions.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.Logging.Abstractions.dll" />
+			</Component>
+			<Component Id="CScriptEz.exe" Guid="0292f7d5-2f92-4458-bd12-ccc1efaeaf05">
+			  <File Id="CScriptEz.exe" Name="CScriptEz.exe" Source="$(var.CScriptEz_TargetDir)CScriptEz.exe" />
+              <ProgId Advertise="no" Id="CScriptEz.CSep.1" Icon="CScriptEz.exe" IconIndex="1" Description="CScriptEz Script File" >
+                  <Extension Id="csep" ContentType="application/txt">
+                    <Verb Id="open" TargetFile="CScriptEz.exe" Argument="&quot;%1&quot;" Command="Run CScriptEz File" />
+                  </Extension>
+              </ProgId>
+            </Component>
+			<Component Id="Serilog.Sinks.File.dll" Guid="b7e98327-d421-46ef-b70a-1b0008537b5e">
+			  <File Id="Serilog.Sinks.File.dll" Name="Serilog.Sinks.File.dll" Source="$(var.CScriptEz_TargetDir)Serilog.Sinks.File.dll" />
+			</Component>
+			<Component Id="Microsoft.Extensions.DependencyModel.dll" Guid="263cd942-b97c-412a-a26f-dd45745d1856">
+			  <File Id="Microsoft.Extensions.DependencyModel.dll" Name="Microsoft.Extensions.DependencyModel.dll" Source="$(var.CScriptEz_TargetDir)Microsoft.Extensions.DependencyModel.dll" />
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
