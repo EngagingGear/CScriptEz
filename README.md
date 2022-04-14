@@ -2,7 +2,7 @@ CScriptEz is a program that allows you to write script files in C# rather than t
 
 The script is compiled and immediaely run. To reduce the run time it does, optionally, cache the compiled scripts (and deals with changes seamlessly).
 
-Documentation for this software, including how to install and use is to be found <a href="https://github.com/EngagingGear/CscriptEz/wiki">here</a>.
+Documentation for this software, including how to install and use is to be found <a href="https://github.com/EngagingGear/CScriptEz/wiki/CScriptEz-Documentation">here</a>.
 
 <table>
   <tr>
