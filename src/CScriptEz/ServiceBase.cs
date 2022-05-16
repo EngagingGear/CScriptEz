@@ -14,7 +14,7 @@ namespace CScriptEz
 
         protected void Log(string message)
         {
-            Logger.LogInformation(message);
+            Logger.LogInformation($"{GetType().Name}   {message}");
         }
 
         protected void LogDelimiter()

@@ -18,6 +18,7 @@ namespace CScriptEz
             {
                 _resolver.Resolve<IScriptFileReader>(),
                 _resolver.Resolve<IPreprocessor>(),
+                _resolver.Resolve<IPackageProcessor>(),
                 _resolver.Resolve<IScriptAnalyzer>(),
                 _resolver.Resolve<IAnalyzedResultProcessor>(),
                 _resolver.Resolve<IProgramFileGenerator>(),

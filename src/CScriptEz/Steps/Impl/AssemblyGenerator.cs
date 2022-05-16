@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NuGet.Packaging;
 
 namespace CScriptEz.Steps.Impl
 {
@@ -98,7 +97,7 @@ namespace CScriptEz.Steps.Impl
             };
         }
 
-        private PortableExecutableReference[] PrepareReferences(List<string> additionalLibraries)
+        private PortableExecutableReference[] PrepareReferences(List<LibraryDescriptor> additionalLibraries)
         {
             var standardAssembliesPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
             var localAssembliesPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
@@ -129,12 +128,19 @@ namespace CScriptEz.Steps.Impl
             if (additionalLibraries?.Count > 0)
             {
                 references.AddRange(
-                    additionalLibraries.Select(library =>
-                        MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, library))));
+                    additionalLibraries.Select(library => 
+                        MetadataReference.CreateFromFile(
+                            ResolveLibraryPath(library, localAssembliesPath))));
             }
 
             return references.ToArray();
         }
+
+        private string ResolveLibraryPath(LibraryDescriptor library, string localAssembliesPath)
+        {
+            return Path.Combine(library.IsLocal ? localAssembliesPath : library.FolderName, library.FileName);
+        }
+
 
         private byte[] GetCachedAssemblyBytes(ScriptInfo scriptInfo)
         {

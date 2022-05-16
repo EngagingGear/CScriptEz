@@ -46,6 +46,7 @@ namespace CScriptEz
 
             services.AddSingleton<IScriptFileReader, ScriptFileReader>();
             services.AddSingleton<IPreprocessor, Preprocessor>();
+            services.AddSingleton<IPackageProcessor, PackageProcessor>();
             services.AddSingleton<IScriptAnalyzer, ScriptAnalyzer>();
             services.AddSingleton<IAnalyzedResultProcessor, AnalyzedResultProcessor>();
             services.AddSingleton<IProgramFileGenerator, ProgramFileGenerator>();
