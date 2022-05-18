@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NuGet.Common;
 using NuGet.Configuration;
@@ -22,10 +22,35 @@ namespace CScriptEz.Steps.Impl
 {
     public class PackageProcessor : ServiceBase, IPackageProcessor
     {
+        private NuGetFramework _currentFramework;
         private const string DefaultAddress = "https://api.nuget.org/v3/index.json";
+        private ConcurrentDictionary<string, IList<VersionRange>> _loadedPackages;
+        private BlockingCollection<LibraryDescriptor> _libraries;
 
         public PackageProcessor(ILoggerFactory loggerFactory) : base(loggerFactory.CreateLogger<PackageProcessor>())
         {
+            _loadedPackages = new ConcurrentDictionary<string, IList<VersionRange>>();
+        }
+
+        private NuGetFramework CurrentFramework
+        {
+            get
+            {
+                if (_currentFramework == null)
+                {
+                    var currentFrameworkName = GetCurrentFrameworkName();
+                    if (string.IsNullOrWhiteSpace(currentFrameworkName))
+                    {
+                        Log($"Cannot identify current framework. Exiting");
+                        throw new OperationCanceledException("Cannot identify current framework. Exiting");
+                    }
+
+                    _currentFramework =
+                        NuGetFramework.ParseComponents(currentFrameworkName, null);
+                }
+
+                return _currentFramework;
+            }
         }
 
         public void Run(ExecutionContext context)
@@ -37,6 +62,8 @@ namespace CScriptEz.Steps.Impl
                 Log("No packages found. Returning");
                 return;
             }
+
+            _libraries = new BlockingCollection<LibraryDescriptor>(new ConcurrentQueue<LibraryDescriptor>(context.PreprocessorResult.Libraries));
 
             foreach (var package in packages)
             {
@@ -64,13 +91,18 @@ namespace CScriptEz.Steps.Impl
 
                 if (localPackage is { Status: DownloadResourceResultStatus.Available })
                 {
-                    ProcessPackage(localPackage, context.PreprocessorResult.Libraries);
+                    CopyPackageToProgramBinaryFolder(localPackage);
+                    var packageDependencyGroup = localPackage.PackageReader.GetPackageDependencies().GetNearest(CurrentFramework);
+                    LoadPackageDependencyGroup(packageDependencyGroup, address);
                 }
                 else
                 {
                     Log($"Cannot get installed package: {packageId}, address {address}. Skipping package processing");
                 }
             }
+
+            context.PreprocessorResult.Libraries.Clear();
+            context.PreprocessorResult.Libraries.AddRange(_libraries);
         }
 
         private string CheckAddress(string address)
@@ -116,11 +148,16 @@ namespace CScriptEz.Steps.Impl
             var globalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(settings);
 
             var package = GlobalPackagesFolderUtility.GetPackage(new PackageIdentity(packageId, version), globalPackagesFolder);
+            Log(package == null
+                ? $"Package {packageId}, version: {version} not installed."
+                : $"Package {packageId}, version: {version} already installed.");
+
             return package;
         }
 
         public DownloadResourceResult InstallPackage(string packageId, string address, NuGetVersion version)
         {
+            Log($"Trying to install Package {packageId}, version: {version}.");
             INugetLogger logger = NullLogger.Instance;
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -132,7 +169,7 @@ namespace CScriptEz.Steps.Impl
             var resource = repository.GetResource<FindPackageByIdResource>();
 
             // Download the package
-            using MemoryStream packageStream = new MemoryStream();
+            using var packageStream = new MemoryStream();
             resource.CopyNupkgToStreamAsync(
                 packageId,
                 version,
@@ -159,49 +196,70 @@ namespace CScriptEz.Steps.Impl
                 .ConfigureAwait(false)
                 .GetAwaiter()
                 .GetResult();
+
+            Log(downloadResult == null
+                ? $"Could not install Package {packageId}, version: {version}."
+                : $"Installed Package {packageId}, version: {version}.");
+
             return downloadResult;
         }
 
-        private void ProcessPackage(DownloadResourceResult localPackage, List<LibraryDescriptor> libraries)
+        private void CopyPackageToProgramBinaryFolder(DownloadResourceResult localPackage)
         {
             var logger = NullLogger.Instance;
 
-            var targetFrameworkAttribute = (TargetFrameworkAttribute)Assembly.GetExecutingAssembly()
-                .GetCustomAttributes(typeof(TargetFrameworkAttribute))
-                .SingleOrDefault();
-
-            var currentFrameworkName = GetCurrentFrameworkName();
-            if (string.IsNullOrWhiteSpace(currentFrameworkName))
-            {
-                Log($"Cannot identify current framework. Exiting");
-                return;
-            }
-
-            var currentFramework =
-                NuGetFramework.ParseComponents(targetFrameworkAttribute.FrameworkName, null);
+            var currentFramework = CurrentFramework;
 
             Log($"Current framework: {currentFramework.Framework}, version: {currentFramework.Version}");
 
-            var dependencySet = localPackage.PackageReader.NuspecReader
-                .GetDependencyGroups()
-                .GetNearest(currentFramework);
+            // var dependencySet = localPackage.PackageReader.NuspecReader
+            //     .GetDependencyGroups()
+            //     .GetNearest(currentFramework);
+            //
+            // if (dependencySet == null)
+            // {
+            //     Log($"Cannot identify nearest matching framework for current framework {currentFramework}. Exiting");
+            //     return;
+            // }
+            //
+            // Log($"Nearest matching framework is: {dependencySet.TargetFramework}");
 
-            if (dependencySet == null)
+            // var group = localPackage.PackageReader.GetLibItems()
+            //     .FirstOrDefault(x => x.TargetFramework == dependencySet.TargetFramework);
+            //
+            // if (group == null)
+            // {
+            //     Log($"Cannot find files group for framework: {dependencySet.TargetFramework}. Exiting");
+            //     return;
+            // }
+
+
+
+            //var supportedFrameworks = localPackage.PackageReader.GetSupportedFrameworks();
+            // var libFrameworks = localPackage.PackageReader.GetLibItems().Select(x => x.TargetFramework).ToList();
+            var libFrameworks = localPackage.PackageReader.GetLibItems().ToList();
+            // foreach (var libFramework in libFrameworks)
+            // {
+            //     Log($"Library Framework: {libFramework.TargetFramework}");
+            // }
+
+            var matchingLibFramework = NuGetFrameworkUtility.GetNearest(libFrameworks, currentFramework);
+            if (matchingLibFramework == null)
             {
-                Log($"Cannot identify nearest matching framework for current framework {currentFramework}. Exiting");
+                Log($"ERROR.  Could not identify matching library framework for current framework: {currentFramework}. Check package contents");
                 return;
             }
-
-            Log($"Nearest matching framework is: {dependencySet.TargetFramework}");
+            Log($"Matching Library Framework: {matchingLibFramework.TargetFramework}");
 
             var group = localPackage.PackageReader.GetLibItems()
-                .FirstOrDefault(x => x.TargetFramework == dependencySet.TargetFramework);
-
+                .FirstOrDefault(x => x.TargetFramework == matchingLibFramework.TargetFramework);
+            
             if (group == null)
             {
-                Log($"Cannot find files group for framework: {dependencySet.TargetFramework}. Exiting");
+                Log($"ERROR.  Cannot find files group for framework: {matchingLibFramework.TargetFramework}. Exiting");
                 return;
             }
+
 
             //var filesToCopy = new List<string>();
             foreach (var groupItem in group.Items)
@@ -225,8 +283,8 @@ namespace CScriptEz.Steps.Impl
                         continue;
                     }
                 }
-                CopyFile(localPackage.PackageReader.GetStream(groupItem), fileName);
-                libraries.Add(new LibraryDescriptor(fileName, true));
+                CopyFile(localPackage.PackageReader.GetStream(groupItem), targetPath);
+                _libraries.Add(new LibraryDescriptor(fileName, true));
             }
         }
 
@@ -265,6 +323,68 @@ namespace CScriptEz.Steps.Impl
         private string GetDestinationDir()
         {
             return Path.GetDirectoryName(typeof(Program).Assembly.Location);
+        }
+
+
+        private void LoadPackageDependencyGroup(PackageDependencyGroup packageDependencyGroup, string address)
+        {
+            if (packageDependencyGroup == null)
+            {
+                return;
+            }
+            Log($"Loading PackageDependency Group.");
+            foreach (var packageDependency in packageDependencyGroup.Packages)
+            {
+                Log($"Loading PackageDependency item: {packageDependency}");
+                LoadPackageDependency(packageDependency, address);
+            }
+        }
+
+        private void LoadPackageDependency(PackageDependency packageDependency, string address)
+        {
+            var packageId = packageDependency.Id;
+            var versionRange = packageDependency.VersionRange;
+            var requiredVersion = versionRange.MinVersion;
+            var isLoaded = IsPackageDependencyLoaded(packageId, versionRange);
+            if (isLoaded)
+            {
+                Log($"PackageDependency already loaded: {packageDependency}. Skipping");
+                return;
+            }
+            Log($"PackageDependency was not loaded: {packageDependency}. Checking if package is installed locally");
+
+            var localPackage = GetInstalledPackage(packageId, requiredVersion)
+                               ?? InstallPackage(packageId, address, requiredVersion);
+
+            CopyPackageToProgramBinaryFolder(localPackage);
+            UpdateLoadedPackages(packageId, localPackage.PackageReader.NuspecReader.GetVersion());
+            var packageDependencyGroup = localPackage.PackageReader.GetPackageDependencies().GetNearest(CurrentFramework);
+            LoadPackageDependencyGroup(packageDependencyGroup, address);
+        }
+
+        private void UpdateLoadedPackages(string packageId, NuGetVersion version)
+        {
+            if (_loadedPackages.TryGetValue(packageId, out var versions))
+            {
+                versions.Add(new VersionRange(version));
+            }
+            else
+            {
+                versions = new List<VersionRange>();
+                versions.Add(new VersionRange(version));
+                _loadedPackages[packageId] = versions;
+            }
+        }
+
+        private bool IsPackageDependencyLoaded(string packageId, VersionRange versionRange)
+        {
+            if (!_loadedPackages.TryGetValue(packageId, out var versions))
+            {
+                return false;
+            }
+            Log($"Package was loaded {packageId}. Checking if version exists: {versionRange.MinVersion}");
+            var isLoaded = versions.Any(x => x.Satisfies(versionRange.MinVersion));
+            return isLoaded;
         }
     }
 }

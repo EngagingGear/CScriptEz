@@ -12,9 +12,17 @@ namespace CScriptEz
             Logger = logger;
         }
 
-        protected void Log(string message)
+        protected void Log(string message, bool messageOnNextLine = false)
         {
-            Logger.LogInformation($"{GetType().Name}   {message}");
+            if (messageOnNextLine)
+            {
+                Logger.LogInformation($"{GetType().Name}");
+                Logger.LogInformation($"{Environment.NewLine}{message}");
+            }
+            else
+            {
+                Logger.LogInformation($"{GetType().Name}   {message}");
+            }
         }
 
         protected void LogDelimiter()

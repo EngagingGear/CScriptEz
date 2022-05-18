@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,8 +26,16 @@ namespace CScriptEz.Steps.Impl
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                 .AddMembers(members);
 
+            var arguments = SyntaxFactory.ParseAttributeArgumentList("(\".NETCoreApp, Version = v5.0\", FrameworkDisplayName=\"\")");
+            var name = SyntaxFactory.ParseName("assembly: TargetFramework");
+            var attribute = SyntaxFactory.Attribute(name, arguments);
+
+            var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute))
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+
             var namespaceDeclaration = SyntaxFactory
                 .NamespaceDeclaration(SyntaxFactory.ParseName("CScriptEzNs"))
+                .AddAttributeLists(attributeList)
                 .NormalizeWhitespace()
                 .AddMembers(classDeclaration);
 
@@ -43,7 +52,7 @@ namespace CScriptEz.Steps.Impl
 
         private void PrintGeneratedCode(string code)
         {
-            Log(code);
+            Log(code, true);
         }
     }
 }

@@ -1,4 +1,8 @@
-﻿using System;
+﻿//@nuget EPPlus 5.8.6
+//@nuget CsvHelper 27.2.1
+
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -11,7 +15,7 @@ var fileInfo = new FileInfo(@"Properties\ItemList.xlsx");
 if (!fileInfo.Exists)
 {
     Console.WriteLine(@"Current Directory: " + Directory.GetCurrentDirectory());
-    Console.WriteLine(@"File 'Properties\ItemList.xlsx' does not exist. Returning");
+    Console.WriteLine(@"File '..\Properties\ItemList.xlsx' does not exist. Returning");
     return;
 }
 

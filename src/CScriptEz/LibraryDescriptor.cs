@@ -19,5 +19,10 @@ namespace CScriptEz
         public string FileName { get; }
         public bool IsLocal { get; }
         public string FolderName { get; }
+
+        public override string ToString()
+        {
+            return $"FileName: {FileName}, IsLocal: {IsLocal}, FolderName: {FolderName}";
+        }
     }
 }
