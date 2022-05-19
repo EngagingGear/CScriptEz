@@ -200,6 +200,36 @@ In this case when CScriptEz is run with a file called, for example: `c:\Users\jo
 - Otherwise it removes any matching records (cascading to BinaryFile) and compiles the file as normal.
 
 
+## Clearing cache
+It is possible to clear cached compilations. This can be invoked by calling CscriptEz with --clear-cache [FileName] command. 
+If file name passed then cached compilation will be cleared from database for specified file only.
+If --clear-cache command was invoked without file name then all cached compilations will be removed from database.
+
+
+## Clearing stale cache.
+It is possible to clear cached compilations if appropriate files were removed from the disk. 
+This can be invoked by calling CscriptEz with --clear-stale [FileName] command. 
+If file name passed then cached compilation will be cleared from database for specified file only if file doesn't exist on the disk.
+If --clear-stale command was invoked without file name then any cached compilation will be removed from database if its related file doesn't exist on the disk.
+
+
+
+## Using Nuget packages
+If your script uses Nuget packages then the package should be specified with following directive in the top of the script:
+```
+//@nuget PACKAGE-NAME [VERSION] [ADDRESS]
+```
+
+[VERSION] is optional. If omitted then latest version will be used.
+
+[ADDRESS] is optional. If omitted then standard Nuget package repository at address **https://api.nuget.org/v3/index.json** will be used.
+
+```
+Example:
+//@nuget Newtonsoft.Json 13.0.1
+```
+
+
 ## How to install the CScriptEz
 First of all download the installer and install the software. (You can if you prefer build it directly from the source code too.)
 
