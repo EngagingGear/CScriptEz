@@ -202,15 +202,16 @@ In this case when CScriptEz is run with a file called, for example: `c:\Users\jo
 
 ## Clearing cache
 It is possible to clear cached compilations. This can be invoked by calling CscriptEz with --clear-cache [FileName] command. 
-If file name passed then cached compilation will be cleared from database for specified file only.
-If --clear-cache command was invoked without file name then all cached compilations will be removed from database.
+If filename is given then the cached compilation will be cleared from the database for the specified file only.
+If the --clear-cache command was invoked without a filename then all cached compilations will be removed from database.
 
 
 ## Clearing stale cache.
-It is possible to clear cached compilations if appropriate files were removed from the disk. 
-This can be invoked by calling CscriptEz with --clear-stale [FileName] command. 
-If file name passed then cached compilation will be cleared from database for specified file only if file doesn't exist on the disk.
-If --clear-stale command was invoked without file name then any cached compilation will be removed from database if its related file doesn't exist on the disk.
+It is possible to clear cached compilations for all files where the original csez file were removed from the disk. 
+To do this run CscriptEz with --clear-stale [FileName] command. 
+
+If filename is given then cached compilation will be cleared from the database for the specified file only if the file doesn't exist on the disk.
+If the --clear-stale command was invoked without the filename then the cache is searched for any entries that are for a csez file that no longer exists and is cleared for that entry.
 
 
 
