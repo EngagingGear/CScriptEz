@@ -30,10 +30,21 @@ namespace CScriptEz
             Logger.LogInformation("=======================================================");
         }
 
-        public void LogTitle(string title)
+        protected void LogTitle(string title)
         {
             LogDelimiter();
             Log(title);
+        }
+
+        protected void LogException(Exception e)
+        {
+            Log(e.Message, true);
+            var inner = e.InnerException;
+            while (inner != null)
+            {
+                Log(inner.Message, true);
+                inner = inner.InnerException;
+            }
         }
     }
 }

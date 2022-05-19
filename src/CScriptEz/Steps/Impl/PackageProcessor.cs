@@ -280,9 +280,10 @@ namespace CScriptEz.Steps.Impl
                     if(!TryRemoveExistingFile(targetPath))
                     {
                         Log($"Cannot delete existing package file {Path.GetFileName(targetPath)}. Existing file will be used. Skipping");
+                        _libraries.Add(new LibraryDescriptor(fileName, true));
                         continue;
                     }
-                }
+                } 
                 CopyFile(localPackage.PackageReader.GetStream(groupItem), targetPath);
                 _libraries.Add(new LibraryDescriptor(fileName, true));
             }
@@ -382,6 +383,7 @@ namespace CScriptEz.Steps.Impl
             {
                 return false;
             }
+
             Log($"Package was loaded {packageId}. Checking if version exists: {versionRange.MinVersion}");
             var isLoaded = versions.Any(x => x.Satisfies(versionRange.MinVersion));
             return isLoaded;

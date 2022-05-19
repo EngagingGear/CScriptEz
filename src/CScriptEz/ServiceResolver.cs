@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using CScriptEz.CommandProcessors;
 using CScriptEz.Data;
 using CScriptEz.Steps;
 using CScriptEz.Steps.Impl;
@@ -43,7 +44,7 @@ namespace CScriptEz
 
         private void RegisterServices(IServiceCollection services)
         {
-
+            services.AddSingleton<IArgumentsParser, ArgumentsParser>();
             services.AddSingleton<IScriptFileReader, ScriptFileReader>();
             services.AddSingleton<IPreprocessor, Preprocessor>();
             services.AddSingleton<IPackageProcessor, PackageProcessor>();
@@ -56,6 +57,9 @@ namespace CScriptEz
             
             services.AddSingleton<ICScriptEzApplication, CScriptEzApplication>();
             services.AddSingleton<IWorkflowStepsProvider, WorkflowStepsProvider>();
+            
+            services.AddSingleton<IClearCacheCommandProcessor, ClearCacheCommandProcessor>();
+            services.AddSingleton<IClearStaleCommandProcessor, ClearStaleCommandProcessor>();
         }
 
         public void Dispose()

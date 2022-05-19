@@ -101,16 +101,19 @@ namespace CScriptEz.Steps.Impl
 
         private PortableExecutableReference[] PrepareReferences(List<LibraryDescriptor> additionalLibraries)
         {
-            var standardAssembliesPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            var coreObjectPath = typeof(object).Assembly.Location;
+            var standardAssembliesPath = Path.GetDirectoryName(coreObjectPath);
             var localAssembliesPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
             var references = new List<PortableExecutableReference>();
 
+            Log($"Core object path: {coreObjectPath}");
+            references.Add(MetadataReference.CreateFromFile(coreObjectPath));
             references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Runtime.dll"));
             //references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "mscorlib.dll"));
             references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "netstandard.dll"));
             references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "Microsoft.CSharp.dll"));
-            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Private.CoreLib.dll"));
+            //references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Private.CoreLib.dll"));
             references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.dll"));
             references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Collections.dll"));
             references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Console.dll"));

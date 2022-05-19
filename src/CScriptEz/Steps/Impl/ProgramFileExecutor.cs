@@ -17,6 +17,7 @@ namespace CScriptEz.Steps.Impl
         public void Run(ExecutionContext context)
         {
             LogTitle("Executing assembly");
+            // RunInProcess(context);
             if (!HasDefinedNugetPackages(context))
             {
                 RunInProcess(context);
