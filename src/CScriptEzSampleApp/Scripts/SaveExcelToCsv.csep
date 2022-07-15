@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using CsvHelper;
+using OfficeOpenXml;
+
+var data = new List<List<string>>();
+var fileInfo = new FileInfo(@"Properties\ItemList.xlsx");
+if (!fileInfo.Exists)
+{
+    Console.WriteLine(@"Current Directory: " + Directory.GetCurrentDirectory());
+    Console.WriteLine(@"File 'Properties\ItemList.xlsx' does not exist. Returning");
+    return;
+}
+
+using var package = new ExcelPackage(fileInfo);
+var firstSheet = package.Workbook.Worksheets["Sheet1"];
+
+var start = firstSheet.Dimension.Start;
+var end = firstSheet.Dimension.End;
+for (var row = start.Row; row <= end.Row; row++)
+{ // Row by row...
+    var dataRow = new List<string>();
+    for (var col = start.Column; col <= end.Column; col++)
+    { // ... Cell by cell...
+        var cellValue = firstSheet.Cells[row, col].Text; // This got me the actual value I needed.
+        dataRow.Add(cellValue);
+    }
+    data.Add(dataRow);
+}
+
+
+using var fileWriter = new StreamWriter("ItemList.csv");
+using var writer = new CsvWriter(fileWriter, CultureInfo.CurrentCulture);
+foreach (var dataRow in data)
+{
+    foreach (var cellValue in dataRow)
+    {
+        writer.WriteField(cellValue);
+    }
+    writer.NextRecord();
+}
+Console.WriteLine("Copied data from Excel to Csv");
+Console.WriteLine();
