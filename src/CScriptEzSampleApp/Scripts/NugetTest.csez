@@ -1,0 +1,20 @@
+﻿//@cached
+//@nuget Newtonsoft.Json 13.0.1
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
+
+var videogames = new List<string>
+{
+    "Starcraft",
+    "Halo",
+    "Legend of Zelda"
+};
+
+string json = JsonConvert.SerializeObject(videogames);
+
+Console.WriteLine("Serialized collection: ");
+Console.WriteLine(json);
+Console.WriteLine();

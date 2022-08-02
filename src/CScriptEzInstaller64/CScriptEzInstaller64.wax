@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-16"?>
+﻿<?xml version="1.0" encoding="utf-16"?>
 <Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <DeployedProjects>
     <string>CScriptEz\CScriptEz.csproj</string>
@@ -7,8 +7,8 @@
     <Item Key="" Value="INSTALLFOLDER" />
   </DirectoryMappings>
   <FileMappings />
-  <DeploySymbols>false</DeploySymbols>
-  <DeployLocalizations>true</DeployLocalizations>
+  <DeploySymbols>true</DeploySymbols>
+  <DeployLocalizations>false</DeployLocalizations>
   <DeployExternalLocalizations>false</DeployExternalLocalizations>
   <ExcludedProjectItems>-</ExcludedProjectItems>
 </Configuration>

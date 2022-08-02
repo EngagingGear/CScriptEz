@@ -39,7 +39,7 @@ namespace CScriptEz.DataAccess.Migrations
                         column: x => x.FileModelId,
                         principalTable: "Files",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

@@ -13,7 +13,9 @@ namespace CScriptEz.Steps.Impl
         private const string DirectiveMark = "@";
         private const string LibraryDirective = "library";
         private const string CacheDirective = "cached";
+        private const string PackageDirective = "nuget";
         private const char LibrariesDelimiter = ',';
+        private const char SpaceDelimiter = ' ';
 
         public Preprocessor(ILoggerFactory loggerFactory) : base(loggerFactory.CreateLogger<Preprocessor>())
         {
@@ -45,15 +47,22 @@ namespace CScriptEz.Steps.Impl
                 return new SyntaxTrivia();
             });
 
-            var libraries = new List<string>();
+            var libraries = new List<LibraryDescriptor>();
+            var packages = new List<PackageDescriptor>();
             var cache = false;
 
+            Log($"Found directives: {string.Join(",", directives)}");
             foreach (var directive in directives.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 if (IsLibraryDirective(directive))
                 {
                     Log($"Found library directive: {directive}");
                     libraries.AddRange(ParseLibraries(directive));
+                }
+                else if (IsPackageDirective(directive))
+                {
+                    Log($"Found package directive: {directive}");
+                    packages.Add(ParsePackage(directive));
                 }
                 else if (IsCacheDirective(directive))
                 {
@@ -64,6 +73,7 @@ namespace CScriptEz.Steps.Impl
 
             var result = new PreprocessorResult(newRoot);
             result.Libraries.AddRange(libraries);
+            result.Packages.AddRange(packages);
             result.Cached = cache;
 
             context.PreprocessorResult = result;
@@ -74,14 +84,19 @@ namespace CScriptEz.Steps.Impl
             return directive.StartsWith(LibraryDirective);
         }
 
+        private bool IsPackageDirective(string directive)
+        {
+            return directive.StartsWith(PackageDirective);
+        }
+
         private bool IsCacheDirective(string directive)
         {
             return directive.StartsWith(CacheDirective);
         }
 
-        private List<string> ParseLibraries(string directive)
+        private List<LibraryDescriptor> ParseLibraries(string directive)
         {
-            var result = new List<string>();
+            var result = new List<LibraryDescriptor>();
             var value = GetDirectiveValue(directive, LibraryDirective);
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -89,9 +104,25 @@ namespace CScriptEz.Steps.Impl
             }
 
             var values = value.Split(LibrariesDelimiter);
-            result.AddRange(values.Where(x => !string.IsNullOrWhiteSpace(x)));
+            result.AddRange(values.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => new LibraryDescriptor(x, true)));
             return result;
         }
+
+        private PackageDescriptor ParsePackage(string directive)
+        {
+            var value = GetDirectiveValue(directive, PackageDirective);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            var values = value.Split(SpaceDelimiter);
+            var name = values[0].Trim();
+            var version = values.Length > 1 ? values[1].Trim() : null;
+            var address = values.Length > 2 ? values[2].Trim() : null;
+            return new PackageDescriptor(name, version, address);
+        }
+
 
         private string GetDirective(SyntaxTrivia comment)
         {

@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <RemoveDir Directories="$(TargetDir)CScriptEzTool" />
     <Exec Command="mkdir $(TargetDir)CScriptEzTool&#xD;&#xA;copy $(SolutionDir)CScriptEz\$(OutDir)*.* $(TargetDir)CScriptEzTool\&#xD;&#xA;" />
   </Target>
 
@@ -24,13 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Scripts\SaveExcelToCsv.csep">
+    <None Update="Scripts\NugetTest.csez">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\Test.csep">
+    <None Update="Scripts\SaveExcelToCsv.csez">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\TestWithMethods.csep">
+    <None Update="Scripts\Test.csez">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\TestWithMethods.csez">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

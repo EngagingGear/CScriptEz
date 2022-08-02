@@ -12,9 +12,17 @@ namespace CScriptEz
             Logger = logger;
         }
 
-        protected void Log(string message)
+        protected void Log(string message, bool messageOnNextLine = false)
         {
-            Logger.LogInformation(message);
+            if (messageOnNextLine)
+            {
+                Logger.LogInformation($"{GetType().Name}");
+                Logger.LogInformation($"{Environment.NewLine}{message}");
+            }
+            else
+            {
+                Logger.LogInformation($"{GetType().Name}   {message}");
+            }
         }
 
         protected void LogDelimiter()
@@ -22,10 +30,21 @@ namespace CScriptEz
             Logger.LogInformation("=======================================================");
         }
 
-        public void LogTitle(string title)
+        protected void LogTitle(string title)
         {
             LogDelimiter();
             Log(title);
+        }
+
+        protected void LogException(Exception e)
+        {
+            Log(e.Message, true);
+            var inner = e.InnerException;
+            while (inner != null)
+            {
+                Log(inner.Message, true);
+                inner = inner.InnerException;
+            }
         }
     }
 }

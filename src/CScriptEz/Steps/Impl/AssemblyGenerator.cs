@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NuGet.Packaging;
 
 namespace CScriptEz.Steps.Impl
 {
@@ -55,7 +54,7 @@ namespace CScriptEz.Steps.Impl
                 var compilation = CSharpCompilation.Create(
                     "CScriptExecutor.exe",
                     options: new CSharpCompilationOptions(
-                        OutputKind.ConsoleApplication),
+                        OutputKind.ConsoleApplication, generalDiagnosticOption: ReportDiagnostic.Info),
                     syntaxTrees: new[] { tree },
                     references: references);
 
@@ -80,6 +79,8 @@ namespace CScriptEz.Steps.Impl
                     throw new CScriptEzException("Error on compilation program file");
                 }
 
+                //compilation.Emit("CScriptExecutor2.exe", "CScriptExecutor2.pdb");
+
                 if (cached)
                 {
                     SaveAssemblyBytes(scriptInfo, assemblyBytes);
@@ -98,43 +99,59 @@ namespace CScriptEz.Steps.Impl
             };
         }
 
-        private PortableExecutableReference[] PrepareReferences(List<string> additionalLibraries)
+        private PortableExecutableReference[] PrepareReferences(List<LibraryDescriptor> additionalLibraries)
         {
-            var standardAssembliesPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            var coreObjectPath = typeof(object).Assembly.Location;
+            var standardAssembliesPath = Path.GetDirectoryName(coreObjectPath);
             var localAssembliesPath = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
             var references = new List<PortableExecutableReference>();
 
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "mscorlib.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "netstandard.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "Microsoft.CSharp.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Private.CoreLib.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Collections.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Console.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Core.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Data.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Globalization.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.IO.FileSystem.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Linq.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Net.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.ObjectModel.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, "System.Runtime.dll")));
-            
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(localAssembliesPath, "EPPlus.dll")));
-            references.Add(MetadataReference.CreateFromFile(Path.Combine(localAssembliesPath, "CsvHelper.dll")));
+            Log($"Core object path: {coreObjectPath}");
+            references.Add(MetadataReference.CreateFromFile(coreObjectPath));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Runtime.dll"));
+            //references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "mscorlib.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "netstandard.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "Microsoft.CSharp.dll"));
+            //references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Private.CoreLib.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Collections.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Console.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Core.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Data.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.IO.FileSystem.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Globalization.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Linq.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.Net.dll"));
+            references.Add(ResolveReferencedAssemblyPath(standardAssembliesPath, "System.ObjectModel.dll"));
 
-            // references.Add(MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "Newtonsoft.Json")));
-
+            Log("Referencing additional libraries");
             if (additionalLibraries?.Count > 0)
             {
                 references.AddRange(
                     additionalLibraries.Select(library =>
-                        MetadataReference.CreateFromFile(Path.Combine(standardAssembliesPath, library))));
+                    {
+                        var libraryPath = ResolveLibraryPath(library, localAssembliesPath);
+                        Log($"Referencing external library: {libraryPath}");
+                        return MetadataReference.CreateFromFile(libraryPath);
+                    }));
             }
 
             return references.ToArray();
         }
+
+        private string ResolveLibraryPath(LibraryDescriptor library, string localAssembliesPath)
+        {
+            return Path.Combine(library.IsLocal ? localAssembliesPath : library.FolderName, library.FileName);
+        }
+
+        private PortableExecutableReference ResolveReferencedAssemblyPath(string standardAssembliesPath, string fileName)
+        {
+            var referencePath = Path.Combine(standardAssembliesPath, fileName);
+            Log($"Referencing library: {referencePath}");
+            return MetadataReference.CreateFromFile(referencePath);
+        }
+
 
         private byte[] GetCachedAssemblyBytes(ScriptInfo scriptInfo)
         {

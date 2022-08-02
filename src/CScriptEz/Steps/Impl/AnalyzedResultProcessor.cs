@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 
@@ -34,6 +35,10 @@ namespace CScriptEz.Steps.Impl
                 result.Usings.Add(usingDirective);
                 Log($"\tUsing directive: {usingDirective.Name}");
             }
+
+            Log($"\tAdding 'System.Runtime.Versioning' Using directive for assembly scope attributes");
+            result.Usings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Runtime.Versioning")));
+
 
             var scriptContent = new List<SyntaxNode>();
 

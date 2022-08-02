@@ -9,7 +9,7 @@ namespace CScriptEzSampleApp
         static void Main(string[] args)
         {
             var simpleTestMenu = new ConsoleMenu(args, level: 1)
-                .Add("Run Simple Test", () => LaunchScript(@"Scripts\Test.csep"))
+                .Add("Run Simple Test", () => LaunchScript(@"Scripts\Test.csez"))
                 .Add("Return Back", ConsoleMenu.Close)
                 .Configure(config =>
                 {
@@ -17,7 +17,7 @@ namespace CScriptEzSampleApp
                 });
 
             var testWithMethodsMenu = new ConsoleMenu(args, level: 1)
-                .Add("Run Test with Methods", () => LaunchScript(@"Scripts\TestWithMethods.csep"))
+                .Add("Run Test with Methods", () => LaunchScript(@"Scripts\TestWithMethods.csez"))
                 .Add("Return Back", ConsoleMenu.Close)
                 .Configure(config =>
                 {
@@ -25,7 +25,15 @@ namespace CScriptEzSampleApp
                 });
 
             var testExcelParserMenu = new ConsoleMenu(args, level: 1)
-                .Add("Run Excel", () => LaunchScript(@"Scripts\SaveExcelToCsv.csep"))
+                .Add("Run Excel", () => LaunchScript(@"Scripts\SaveExcelToCsv.csez"))
+                .Add("Return Back", ConsoleMenu.Close)
+                .Configure(config =>
+                {
+                    config.ClearConsole = false;
+                });
+
+            var testNuget = new ConsoleMenu(args, level: 1)
+                .Add("Run Nuget Test", () => LaunchScript(@"Scripts\NugetTest.csez"))
                 .Add("Return Back", ConsoleMenu.Close)
                 .Configure(config =>
                 {
@@ -36,6 +44,7 @@ namespace CScriptEzSampleApp
                 .Add("Simple Test", simpleTestMenu.Show)
                 .Add("Test With Methods", testWithMethodsMenu.Show)
                 .Add("Save Excel To Csv", testExcelParserMenu.Show)
+                .Add("Test Nuget", testNuget.Show)
                 .Add("Quit", ConsoleMenu.Close)
                 .Configure(config =>
                 {
